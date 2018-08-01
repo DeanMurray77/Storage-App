@@ -10,6 +10,32 @@ const PORT = normalizePort(process.env.PORT || 5000);
 const app = express();
 const dev = app.get('env') !== 'production';
 
+const Sequelize = require('sequelize');
+const sequelize = new Sequelize(
+    process.env.DATABASE_NAME,
+    process.env.DATABASE_USER,
+    process.env.DATABASE_PASSWORD,
+    {
+        replication: {
+            read: [
+                { host: process.env.DATABASE_HOST },
+            ],
+            write: { host: process.env.DATABASE_WRITE_HOST },
+        },
+        dialect: 'mysql',
+        operatorsAliases: false,
+        logging: false,
+        pool: {
+            max: 5,
+            idle: 1000,
+            acquire: 2000,
+        },
+        dialectOptions: {
+            ssl: 'Amazon RDS',
+        },
+    },
+);
+
 if(!dev) {
     app.disable('x-powered-by');
     app.use(compression());
